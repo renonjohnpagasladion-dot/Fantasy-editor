@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fantasy Editor</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #100d20;
+  color: white;
+}
+
+header {
+  text-align: center;
+  padding: 25px 12px;
+  background: linear-gradient(135deg, #25104b, #7028a0);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+header p {
+  color: #e1d5ff;
+}
+
+main {
+  padding: 16px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.panel {
+  background: #211936;
+  border: 1px solid #49366c;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+h2 {
+  font-size: 19px;
+  color: #e0b8ff;
+}
+
+input, button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+input {
+  background: #fff;
+  color: #222;
+}
+
+button {
+  border: 0;
+  background: #873fe0;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:active {
+  opacity: .8;
+}
+
+.effects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.effects button {
+  margin: 0;
+  min-height: 75px;
+  background: #382453;
+  border: 1px solid #7954a5;
+}
+
+.effects button.selected {
+  background: #a64cff;
+  border: 2px solid white;
+}
+
+#preview {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  background: #080711;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+video {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+}
+
+#magic {
+  position: absolute;
+  left: 65%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  font-size: 55px;
+  pointer-events: none;
+  display: none;
+  filter: drop-shadow(0 0 12px #fff);
+  animation: pulse .6s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: translate(-50%,-50%) scale(.85); }
+  to { transform: translate(-50%,-50%) scale(1.2); }
+}
+
+.hint {
+  color: #c8bddb;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #b7a9ca;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>💎 Fantasy Editor</h1>
+  <p>Bring your magical imagination to life!</p>
+</header>
+
+<main>
+
+<section class="panel">
+  <h2>🎬 1. Choose Your Video</h2>
+  <input id="file" type="file" accept="video/*">
+  <div id="preview">
+    <span id="placeholder">Your video preview appears here</span>
+    <video id="video" controls playsinline style="display:none"></video>
+    <div id="magic">🔥</div>
+  </div>
+  <p class="hint">
+    Choose a video from your phone to preview it.
+  </p>
+</section>
+
+<section class="panel">
+  <h2>✨ 2. Choose a Magical Power</h2>
+  <div class="effects">
+    <button data-effect="🔥">🔥 Fire Power</button>
+    <button data-effect="💧">💧 Water Power</button>
+    <button data-effect="🌪️">🌪️ Wind Power</button>
+    <button data-effect="🌿">🌿 Earth Power</button>
+    <button data-effect="⚡">⚡ Energy Blast</button>
+    <button data-effect="💎">💎 Brilyante</button>
+  </div>
+  <button id="clear">Remove Effect</button>
+</section>
+
+<section class="panel">
+  <h2>🎨 3. Adjust Your Effect</h2>
+
+  <label for="size">Effect Size</label>
+  <input id="size" type="range" min="20" max="150" value="55">
+
+  <label for="horizontal">Horizontal Position</label>
+  <input id="horizontal" type="range" min="0" max="100" value="65">
+
+  <label for="vertical">Vertical Position</label>
+  <input id="vertical" type="range" min="0" max="100" value="55">
+
+  <p class="hint">
+    Adjust the effect's size and position over your video.
+  </p>
+</section>
+
+<section class="panel">
+  <h2>📤 4. Export</h2>
+  <p class="hint">
+    This first version previews your video and magical overlay.
+    Exporting a finished video with the effect permanently applied
+    will require an additional video-rendering feature.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  Fantasy Editor · Version 1.0
+</footer>
+
+<script>
+const fileInput = document.getElementById("file");
+const video = document.getElementById("video");
+const placeholder = document.getElementById("placeholder");
+const magic = document.getElementById("magic");
+const size = document.getElementById("size");
+const horizontal = document.getElementById("horizontal");
+const vertical = document.getElementById("vertical");
+
+let videoURL = null;
+
+fileInput.addEventListener("change", function() {
+  const file = this.files[0];
+  if (!file) return;
+
+  if (videoURL) URL.revokeObjectURL(videoURL);
+
+  videoURL = URL.createObjectURL(file);
+  video.src = videoURL;
+  video.style.display = "block";
+  placeholder.style.display = "none";
+});
+
+document.querySelectorAll("[data-effect]").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-effect]").forEach(b =>
+      b.classList.remove("selected")
+    );
+
+    button.classList.add("selected");
+    magic.textContent = button.dataset.effect;
+    magic.style.display = "block";
+    updateEffect();
+  });
+});
+
+document.getElementById("clear").addEventListener("click", () => {
+  magic.style.display = "none";
+  document.querySelectorAll("[data-effect]").forEach(b =>
+    b.classList.remove("selected")
+  );
+});
+
+function updateEffect() {
+  magic.style.fontSize = size.value + "px";
+  magic.style.left = horizontal.value + "%";
+  magic.style.top = vertical.value + "%";
+}
+
+[size, horizontal, vertical].forEach(input => {
+  input.addEventListener("input", updateEffect);
+});
+</script>
+
+</body>
+  </html>
